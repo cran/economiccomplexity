@@ -1,0 +1,196 @@
+---
+title: "How to use this package"
+author: "Mauricio Vargas"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: ../inst/REFERENCES.bib
+vignette: >
+  %\VignetteIndexEntry{How to use this package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, cache = FALSE, echo = FALSE, message = FALSE, warning = FALSE, tidy = FALSE}
+knitr::opts_chunk$set(eval = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Basic trade example
+
+## Package data
+
+I'll use this demo dataset to illustrate the essential usage of the functions within this package:
+
+```{r}
+library(economiccomplexity)
+
+services_trade_2016$services_trade_2016_tibble
+```
+
+## Revealed comparative Advantage (RCA)
+
+You can obtain RCA with `revealed_comparative_advantage()`:
+```{r}
+rca <- revealed_comparative_advantage(
+  trade_data = services_trade_2016$services_trade_2016_tibble, 
+  country = "country",
+  product = "product", 
+  value = "value"
+)
+
+# 5x5 preview
+rca[1:5,1:3]
+```
+
+And also you can obtain it in tabular version:
+```{r}
+rca_tbl <- revealed_comparative_advantage(
+  trade_data = services_trade_2016$services_trade_2016_tibble, 
+  country = "country",
+  product = "product", 
+  value = "value",
+  tbl_output = T
+)
+
+rca_tbl
+```
+
+Another possibility, *not used to build networks from bipartite relations*, is to obtain RCA as a matrix or tibble without discretization:
+
+```{r}
+rca_decimal <- revealed_comparative_advantage(
+  trade_data = services_trade_2016$services_trade_2016_tibble, 
+  country = "country",
+  product = "product", 
+  value = "value",
+  discrete = F
+)
+
+# 5x3 preview
+rca_decimal[1:5,1:3]
+```
+
+```{r}
+rca_decimal_tbl <- revealed_comparative_advantage(
+  trade_data = services_trade_2016$services_trade_2016_tibble, 
+  country = "country",
+  product = "product", 
+  value = "value",
+  tbl_output = T,
+  discrete = F
+)
+
+rca_decimal_tbl
+```
+
+## Complexity Measures
+
+You can compute both Economic Complexity Index (ECI) and Product Complexity Index (PCI) by using `complexity_measures()`. The calculations methods are *reflections*, *eigenvalues* and *fitness* (default). See [@atlas2014] and [@measuringcomplexity2015] for the methodological details.
+
+```{r}
+cm_reflections <- complexity_measures(
+  revealed_comparative_advantage = rca, 
+  method = "reflections", 
+  tbl_output = T
+)
+
+cm_reflections$economic_complexity_index
+cm_reflections$product_complexity_index
+```
+
+```{r}
+cm_eigenvalues <- complexity_measures(
+  revealed_comparative_advantage = rca,
+  method = "eigenvalues",
+  tbl_output = T
+)
+
+cm_eigenvalues$economic_complexity_index
+cm_eigenvalues$product_complexity_index
+```
+
+```{r}
+cm_fitness <- complexity_measures(
+  revealed_comparative_advantage = rca,
+  method = "fitness", 
+  tbl_output = T
+)
+
+cm_fitness$economic_complexity_index
+cm_fitness$product_complexity_index
+```
+
+## Proximity
+
+Proximity matrices are used to create both country-country and product-product networks. Using `proximity_matrices()` is straightforward:
+```{r}
+pro <- proximity(
+  revealed_comparative_advantage = rca,
+  diversity = cm_fitness$diversity,
+  ubiquity = cm_fitness$ubiquity,
+  tbl_output = T
+)
+
+pro$proximity_countries
+pro$proximity_products
+```
+
+## Networks
+
+The `proximity_networks()` function is designed to use `igraph` for the internal computations and also to pass proximity-based networks to `igraph`, `ggraph` or export to Cytoscape by saving the output as csv/tsv.
+
+To create some reduced networks I'll use a high proximity cutoff:
+
+```{r}
+net <- networks(
+  proximity_countries = pro$proximity_countries,
+  proximity_products = pro$proximity_products,
+  countries_cutoff = 0.7,
+  products_cutoff = 0.1,
+  tbl_output = T
+)
+
+net$network_countries
+net$network_products
+```
+
+Just a two examples with `ggraph`:
+
+```{r, fig.width=20, fig.height=12}
+library(igraph)
+library(ggraph)
+library(magrittr)
+
+set.seed(200100)
+
+net$network_countries %>% 
+  graph_from_data_frame(directed = F) %>% 
+  ggraph(layout = "kk") +
+  geom_edge_link(aes(edge_alpha = value, edge_width = value), edge_colour = "#a8a8a8") +
+  geom_node_point(color = "darkslategray4", size = 8) +
+  geom_node_text(aes(label = name), vjust = 2.2) +
+  ggtitle(
+    expression(paste("Connections between",
+                     italic(" countries "),
+                     "based on the",
+                     italic(" services "),
+                     "they export"))) +
+  theme_void()
+```
+
+```{r, fig.width=20, fig.height=12}
+net$network_products %>% 
+  graph_from_data_frame(directed = F) %>% 
+  ggraph(layout = "kk") +
+  geom_edge_link(aes(edge_alpha = value, edge_width = value), edge_colour = "#a8a8a8") +
+  geom_node_point(color = "darkslategray4", size = 8) +
+  geom_node_text(aes(label = name), vjust = 2.2) +
+  ggtitle(
+    expression(paste("Connections between",
+                     italic(" services "),
+                     "based on the",
+                     italic(" countries "),
+                     "that export them"))) +
+  theme_void()
+```
+
+# References

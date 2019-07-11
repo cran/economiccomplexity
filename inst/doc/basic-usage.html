@@ -12,7 +12,7 @@
 
 <meta name="author" content="Mauricio Vargas" />
 
-<meta name="date" content="2019-06-29" />
+<meta name="date" content="2019-07-11" />
 
 <title>How to use this package</title>
 
@@ -303,7 +303,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">How to use this package</h1>
 <h4 class="author">Mauricio Vargas</h4>
-<h4 class="date">2019-06-29</h4>
+<h4 class="date">2019-07-11</h4>
 
 
 
@@ -504,17 +504,17 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <pre><code>## # A tibble: 11 x 2
 ##    product                                            value
 ##    &lt;chr&gt;                                              &lt;dbl&gt;
-##  1 2 Travel                                          1.48  
-##  2 11 Government services, n.i.e.                    0.940 
-##  3 3 Communications services                         0.821 
-##  4 1 Transportation                                  0.365 
-##  5 10 Personal, cultural, and recreational services  0.272 
-##  6 5 Insurance services                              0.202 
-##  7 6 Financial services                              0.0766
-##  8 4 Construction services                          -0.184 
-##  9 8 Royalties and license fees                     -0.668 
-## 10 7 Computer and information services              -1.51  
-## 11 9 Other business services                        -1.80</code></pre>
+##  1 9 Other business services                         1.80  
+##  2 7 Computer and information services               1.51  
+##  3 8 Royalties and license fees                      0.668 
+##  4 4 Construction services                           0.184 
+##  5 6 Financial services                             -0.0766
+##  6 5 Insurance services                             -0.202 
+##  7 10 Personal, cultural, and recreational services -0.272 
+##  8 1 Transportation                                 -0.365 
+##  9 3 Communications services                        -0.821 
+## 10 11 Government services, n.i.e.                   -0.940 
+## 11 2 Travel                                         -1.48</code></pre>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1">cm_fitness &lt;-<span class="st"> </span><span class="kw">complexity_measures</span>(</a>
 <a class="sourceLine" id="cb19-2" data-line-number="2">  <span class="dt">revealed_comparative_advantage =</span> rca,</a>
 <a class="sourceLine" id="cb19-3" data-line-number="3">  <span class="dt">method =</span> <span class="st">&quot;fitness&quot;</span>, </a>
@@ -523,34 +523,34 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb19-6" data-line-number="6"></a>
 <a class="sourceLine" id="cb19-7" data-line-number="7">cm_fitness<span class="op">$</span>economic_complexity_index</a></code></pre></div>
 <pre><code>## # A tibble: 80 x 2
-##    country              value
-##    &lt;chr&gt;                &lt;dbl&gt;
-##  1 USA                 6.24  
-##  2 Japan               6.17  
-##  3 Singapore          -0.0886
-##  4 Lebanon            -0.0886
-##  5 South Africa       -0.0886
-##  6 China              -0.162 
-##  7 Poland             -0.162 
-##  8 Russian Federation -0.162 
-##  9 Serbia             -0.162 
-## 10 TFYR of Macedonia  -0.162 
+##    country                value
+##    &lt;chr&gt;                  &lt;dbl&gt;
+##  1 USA                39.6     
+##  2 Japan              39.2     
+##  3 Singapore           0.422   
+##  4 Lebanon             0.422   
+##  5 South Africa        0.422   
+##  6 China               0.000167
+##  7 Poland              0.000156
+##  8 Russian Federation  0.000156
+##  9 Serbia              0.000156
+## 10 TFYR of Macedonia   0.000156
 ## # … with 70 more rows</code></pre>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" data-line-number="1">cm_fitness<span class="op">$</span>product_complexity_index</a></code></pre></div>
 <pre><code>## # A tibble: 11 x 2
-##    product                                           value
-##    &lt;chr&gt;                                             &lt;dbl&gt;
-##  1 8 Royalties and license fees                      3.02 
-##  2 6 Financial services                             -0.279
-##  3 7 Computer and information services              -0.304
-##  4 9 Other business services                        -0.304
-##  5 5 Insurance services                             -0.304
-##  6 4 Construction services                          -0.304
-##  7 10 Personal, cultural, and recreational services -0.304
-##  8 3 Communications services                        -0.304
-##  9 1 Transportation                                 -0.304
-## 10 11 Government services, n.i.e.                   -0.304
-## 11 2 Travel                                         -0.304</code></pre>
+##    product                                                  value
+##    &lt;chr&gt;                                                    &lt;dbl&gt;
+##  1 8 Royalties and license fees                     10.9         
+##  2 6 Financial services                              0.0835      
+##  3 7 Computer and information services               0.00000450  
+##  4 9 Other business services                         0.00000401  
+##  5 5 Insurance services                              0.00000263  
+##  6 4 Construction services                           0.00000238  
+##  7 10 Personal, cultural, and recreational services  0.00000116  
+##  8 3 Communications services                         0.000000499 
+##  9 1 Transportation                                  0.000000488 
+## 10 11 Government services, n.i.e.                    0.000000417 
+## 11 2 Travel                                          0.0000000716</code></pre>
 </div>
 <div id="proximity" class="section level2">
 <h2>Proximity</h2>

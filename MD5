@@ -1,12 +1,12 @@
-db601abec6661381e87ef52888c51c53 *DESCRIPTION
+975842e1e8d56f32a395407b5c9d4706 *DESCRIPTION
 4c022176d79ebf3699f8a99399c4316c *NAMESPACE
-d7e84d33a21fd13f2281e4287abab543 *R/complexity_measures.R
+4b93b371c77ba46ae5d5d42614bcbc3b *R/complexity_measures.R
 3ec5a9254e492889fba5e2e8deaeabd6 *R/countries_position.R
 33ead61f6507065dd9e7069e55581ca9 *R/networks.R
 7b9502bdc8559e1a060658884190a681 *R/productivity_levels.R
 70f86f1370a370ed6950d13dfbcc7ada *R/proximity.R
 67197578fab72678a1fbd9d28deda2da *R/revealed_comparative_advantage.R
-2912db9452118e71cb10d34e0674c627 *build/partial.rdb
+d55af45205c8a5f6b37f5a57e4af5f66 *build/partial.rdb
 998dcdc1e38614335472c27ef07dd2d0 *build/vignette.rds
 9cd08fd322425946ca83236bf6b749cd *data/gdp_pc_2016.rda
 bea90cfe2d96048d5a8dd478424c17ad *data/package_output_demo.rda
@@ -14,7 +14,7 @@ bea90cfe2d96048d5a8dd478424c17ad *data/package_output_demo.rda
 82e89f315b74fcdc1ac02131ad5d72ff *inst/REFERENCES.bib
 24b54a2abc99144d5ea817f1ef5c4c98 *inst/doc/basic-usage.R
 1cc9326d6a061a5bdb81864f5e32c2b7 *inst/doc/basic-usage.Rmd
-92bc3a22a3085878326b170a32eab719 *inst/doc/basic-usage.html
+d5410c106124a744635904d56cb6ef48 *inst/doc/basic-usage.html
 5f2e61df439b526c72999b4535d791b5 *man/complexity_measures.Rd
 ff08dba841af653a44d905f01743290c *man/countries_position.Rd
 c2663d1a2c896d963ba4a07e0997b644 *man/gdp_pc_2016.Rd
@@ -25,7 +25,7 @@ abed955b1c76a2081f4ac0a7c96d03f0 *man/productivity_levels.Rd
 e3ba892122dbf7c5e4bdf764523cc1cd *man/revealed_comparative_advantage.Rd
 709889279179b1687efa3b8dc2f4ba9e *man/services_trade_2016.Rd
 75f0304cfd3ea69690b0a6510c12e708 *tests/testthat.R
-612694a9a81dfcd17bbedbbdcb404232 *tests/testthat/test-complexity_measures.R
+18e333b00abcdac09554a282c099880c *tests/testthat/test-complexity_measures.R
 7f24cc9ec4fe690275e85b8073cd9def *tests/testthat/test-countries_position.R
 ac21bcc310c90d3b567655085f68fa65 *tests/testthat/test-networks.R
 cc38099b36195db8998c929dfa2ee627 *tests/testthat/test-productivity_levels.R

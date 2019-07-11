@@ -1,7 +1,7 @@
 Package: economiccomplexity
 Type: Package
 Title: Methods Used in the Economic Complexity Literature
-Version: 0.1.0
+Version: 0.1.2
 Authors@R: c(
     person(given = "Mauricio",
       family = "Vargas",
@@ -11,18 +11,23 @@ Authors@R: c(
     ),
     person(given = "Carlo",
       family = "Bottai",
-      role = c("ctb"),
+      role = "ctb",
       comment = "improved the eigenvalues calculation"
     ),
     person(given = "Diego",
       family = "Kozlowski",
-      role = c("ctb"),
+      role = "ctb",
       comment = "provided initial RCA and proximity functions he used for his thesis"
     ),
     person(given = "Mark",
       family = "Padgham",
-      role = c("ctb"),
-      comment = "compared PRODY equations from different sources"
+      role = "rev",
+      comment = "compared PRODY equations from different articles"
+    ),
+    person(given = "Nico",
+      family = "Pintar",
+      role = "rev",
+      comment = "suggested improvements to special cases in eigenvalues calculation"
     ),
     person(family = "UN COMTRADE",
       role = "dtc"),
@@ -47,15 +52,17 @@ RoxygenNote: 6.1.1
 Suggests: testthat (>= 2.1.0), knitr, Rdpack, ggraph
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2019-06-30 00:10:49 UTC; pacha
+Packaged: 2019-07-11 15:57:26 UTC; pacha
 Author: Mauricio Vargas [aut, cre, cph]
     (<https://orcid.org/0000-0003-1017-7574>),
   Carlo Bottai [ctb] (improved the eigenvalues calculation),
   Diego Kozlowski [ctb] (provided initial RCA and proximity functions he
     used for his thesis),
-  Mark Padgham [ctb] (compared PRODY equations from different sources),
+  Mark Padgham [rev] (compared PRODY equations from different articles),
+  Nico Pintar [rev] (suggested improvements to special cases in
+    eigenvalues calculation),
   UN COMTRADE [dtc],
   The World Bank [dtc]
 Maintainer: Mauricio Vargas <mvargas@dcc.uchile.cl>
 Repository: CRAN
-Date/Publication: 2019-07-02 12:30:06 UTC
+Date/Publication: 2019-07-11 21:58:25 UTC

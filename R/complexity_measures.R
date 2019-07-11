@@ -110,7 +110,8 @@ complexity_measures <- function(revealed_comparative_advantage = NULL,
   kc0 <- Matrix::rowSums(m)
   kp0 <- Matrix::colSums(m)
 
-  if (method == "reflections") {
+  # reflections is defined as a function as these steps are also used for eigenvalues method
+  reflections <- function() {
     # create empty matrices
     kc <- Matrix::Matrix(0, nrow = length(kc0), ncol = iterations, sparse = TRUE)
     kp <- Matrix::Matrix(0, nrow = length(kp0), ncol = iterations, sparse = TRUE)
@@ -132,20 +133,50 @@ complexity_measures <- function(revealed_comparative_advantage = NULL,
     # pci is of even order and normalized as in the Atlas
     pci <- (kp[, iterations] - base::mean(kp[, iterations])) /
       stats::sd(kp[, iterations])
+
+    names(eci) <- rownames(m)
+    names(pci) <- colnames(m)
+
+    return(list(eci = eci, pci = pci))
+  }
+
+  if (method == "reflections") {
+    reflections_output <- reflections()
+    eci <- reflections_output$eci
+    pci <- reflections_output$pci
   }
 
   if (method == "eigenvalues") {
+    # to check if a sign correction is needed
+    reflections_output <- reflections()
+    eci_r <- reflections_output$eci
+    pci_r <- reflections_output$pci
+
+    # compute eigenvalues for eci
     eci <- eigen((m %*% (Matrix::t(m) * (1 / kp0))) * (1 / kc0))
     eci <- Re(eci$vectors[, 2])
 
     # eci normalized as in the Atlas
     eci <- (eci - base::mean(eci)) / stats::sd(eci)
+    names(eci) <- rownames(m)
 
+    # correct eci sign when required
+    if (isTRUE(stats::cor(eci, eci_r, use = "pairwise.complete.obs") < 0)) {
+      eci <- -1 * eci
+    }
+
+    # compute eigenvalues for pci
     pci <- eigen((Matrix::t(m) %*% (m * (1 / kc0))) * (1 / kp0))
     pci <- Re(pci$vectors[, 2])
 
     # pci normalized as in the Atlas
     pci <- (pci - base::mean(pci)) / stats::sd(pci)
+    names(pci) <- colnames(m)
+
+    # correct pci sign when required
+    if (isTRUE(stats::cor(pci, pci_r, use = "pairwise.complete.obs") < 0)) {
+      pci <- -1 * pci
+    }
   }
 
   if (method == "fitness") {
@@ -166,17 +197,12 @@ complexity_measures <- function(revealed_comparative_advantage = NULL,
       kp[, j] <- kp[, j] / mean(kp[, j])
     }
 
-    # eci is of odd order and normalized as in the Atlas
-    eci <- (kc[, iterations - 1] - base::mean(kc[, iterations - 1])) /
-      stats::sd(kc[, iterations - 1])
+    eci <- kc[, iterations]
+    pci <- kp[, iterations]
 
-    # pci is of even order and normalized as in the Atlas
-    pci <- (kp[, iterations] - base::mean(kp[, iterations])) /
-      stats::sd(kp[, iterations])
+    names(eci) <- rownames(m)
+    names(pci) <- colnames(m)
   }
-
-  names(eci) <- rownames(m)
-  names(pci) <- colnames(m)
 
   if (tbl_output == TRUE) {
     eci <- tibble::tibble(value = eci) %>%

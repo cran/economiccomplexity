@@ -1,7 +1,7 @@
 Package: economiccomplexity
 Type: Package
 Title: Methods Used in the Economic Complexity Literature
-Version: 0.1.2
+Version: 0.2
 Authors@R: c(
     person(given = "Mauricio",
       family = "Vargas",
@@ -17,7 +17,8 @@ Authors@R: c(
     person(given = "Diego",
       family = "Kozlowski",
       role = "ctb",
-      comment = "provided initial RCA and proximity functions he used for his thesis"
+      comment = "provided initial RCA and proximity functions he used for his 
+      thesis"
     ),
     person(given = "Mark",
       family = "Padgham",
@@ -27,19 +28,22 @@ Authors@R: c(
     person(given = "Nico",
       family = "Pintar",
       role = "rev",
-      comment = "suggested improvements to special cases in eigenvalues calculation"
+      comment = "suggested improvements to special cases in eigenvalues 
+      calculation"
     ),
-    person(family = "UN COMTRADE",
-      role = "dtc"),
     person(family = "The World Bank",
+      role = "dtc"),
+    person(family = "Open Trade Statistics",
       role = "dtc")
   )
-Description: A wrapper of different indices and networks commonly used in Economic Complexity
-  to explore bipartite relations such as countries and their exported products. These methods
-  are also useful for different kind of relations such as countries and their spoken languages.
-  The functions within this package correspond to code implementations of the equations 
-  described in Hausmann, et al. (2005) <doi:10.3386/w11905>, Hausmann, et al. (2014) 
-  <doi:10.7551/mitpress/9647.001.0001>, and Mariani, et al. (2015) <doi:10.1140/epjb/e2015-60298-7>.
+Description: A wrapper of different indices and networks commonly used in 
+  Economic Complexity to explore bipartite relations such as countries and their
+  exported products. These methods are also useful for different kind of 
+  relations such as countries and their spoken languages.
+  The functions within this package correspond to code implementations of the 
+  equations described in Hausmann, et al. (2005) <doi:10.3386/w11905>, 
+  Hausmann, et al. (2014) <doi:10.7551/mitpress/9647.001.0001>, and 
+  Mariani, et al. (2015) <doi:10.1140/epjb/e2015-60298-7>.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -52,7 +56,7 @@ RoxygenNote: 6.1.1
 Suggests: testthat (>= 2.1.0), knitr, Rdpack, ggraph
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2019-07-11 15:57:26 UTC; pacha
+Packaged: 2019-08-21 00:11:55 UTC; pacha
 Author: Mauricio Vargas [aut, cre, cph]
     (<https://orcid.org/0000-0003-1017-7574>),
   Carlo Bottai [ctb] (improved the eigenvalues calculation),
@@ -61,8 +65,8 @@ Author: Mauricio Vargas [aut, cre, cph]
   Mark Padgham [rev] (compared PRODY equations from different articles),
   Nico Pintar [rev] (suggested improvements to special cases in
     eigenvalues calculation),
-  UN COMTRADE [dtc],
-  The World Bank [dtc]
+  The World Bank [dtc],
+  Open Trade Statistics [dtc]
 Maintainer: Mauricio Vargas <mvargas@dcc.uchile.cl>
 Repository: CRAN
-Date/Publication: 2019-07-11 21:58:25 UTC
+Date/Publication: 2019-08-23 22:40:06 UTC

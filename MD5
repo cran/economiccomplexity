@@ -1,12 +1,12 @@
-1bcd0f92fde8acee04413826a4bc0200 *DESCRIPTION
+33ec5fae2f2f854ce97ada426a9cd1ef *DESCRIPTION
 bab4f9627c74def2d7ba778ee85587bc *NAMESPACE
 1eade75dc74d283fa498aff841699cec *R/complexity_measures.R
 abbe001968729f45e2bc2d7a99ee9489 *R/countries_position.R
 b95795a0065eab5237ef08aae434d276 *R/networks.R
 17f01ea44d5a62d6623690c119e537a7 *R/productivity_levels.R
-9b7c6e4c509ee4ff7348d5ff17f0a22d *R/proximity.R
+c26a66dede78798a1de1dc645fc011f9 *R/proximity.R
 7678e10939d086cce826e9e9464d2379 *R/revealed_comparative_advantage.R
-2689f61e45700a93856872e665e5556d *build/partial.rdb
+5137a38d290cbd4308c4d86b2a72c081 *build/partial.rdb
 7d33cf62639c8a0dd79d70ba02ae065f *build/vignette.rds
 cf54bcd0e330ddd426d06e051283af7a *data/ec_gdp_pc_1962.rda
 ea93f5f0dfc88fb072007346f6710d2a *data/ec_output_demo.rda
@@ -14,7 +14,7 @@ f4cdc702304e4276ef0fc58905962918 *data/ec_trade_1962.rda
 1fb1e4ef1e90db9ef7e25c4eb530fa92 *inst/REFERENCES.bib
 88baaccea35d630cf3c0ed9f28f4ec96 *inst/doc/basic-usage.R
 71c8934659b3c7b1f2d32354288b31c8 *inst/doc/basic-usage.Rmd
-e5427a2fdc4450b704db01a763dd7656 *inst/doc/basic-usage.html
+01fda8225997145c11fad584e3b99290 *inst/doc/basic-usage.html
 f2811fe5d265e57388fa6713e0f2efdd *inst/paper.md
 2098569b71d441f77c9aa72f7403c38a *man/ec_complexity_measures.Rd
 96bf8f50f77f0a67717ba164bbb8a18c *man/ec_countries_position.Rd

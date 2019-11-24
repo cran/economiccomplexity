@@ -1,29 +1,51 @@
-#' Complexity Measures
+#' @title Complexity indices
 #'
-#' @export
+#' @description \code{rca} computes complexity indices following the definitions
+#' from \insertCite{measuringcomplexity2015;textual}{economiccomplexity}
 #'
-#' @param rca matrix or tibble/data.frame (e.g. the
-#' output of \code{revealed_comparative_advantage()}).
-#' If the input is a matrix it must be a zero/one matrix with countries in rows
-#' and ps in columns.
-#' If the input is a tibble/data.frame it must contain at least three columns
-#' with countries, ps and vs.
-#' @param c string to indicate the column that contains exporting
-#' countries in rca (set to "country" by default)
-#' @param p string to indicate the column that contains exported ps
-#' in rca (set to "product" by default)
-#' @param v string to indicate the column that contains traded vs in
-#' rca (set to "value" by default)
-#' @param method string to indicate to use one of these methods: reflections,
-#' eigenvalues or fitness (set to "fitness" by default)
-#' @param atlas logical v to remove the countries not ranked in The
-#' Atlas of Economic Complexity (set to FALSE by default)
-#' @param iterations number of iterations to use in the reflections method
-#' (set to 20 by default)
+#' @details Given a data frame or matrix with RCA
+#' values as input, this function implements the fitness-complexity method,
+#' and the reflections method and eigenvalues computation as alternatives.
+#'
+#' The implementation of a recursive algorithm for both fitness-complexity and
+#' reflections result in a fast computation.
+#'
+#' Eigenvalues can be slow to compute as this method also calls reflections
+#' method in order to check the correlation sign between the two metrics
+#' to determine if there is a sign reversion in the numeric result.
+#'
+#' @param rca matrix or data frame with RCA values
+#' @param method which method to use (by default is "fitness", it can also
+#' be "reflections" or "eigenvalues")
+#' @param iterations number of iterations to use in the fitness, reflections
+#' and indirectly in eigenvalues method (by default is 20)
 #' @param extremality numeric coefficient to use in the fitness method
-#' (set to 1 by default)
-#' @param tbl logical v to use tibble output instead of a matrix
-#' output (set to FALSE by default)
+#' (by default is 1)
+#' @param atlas remove the countries not ranked in The Atlas of Economic
+#' Complexity (by default is FALSE)
+#' @param tbl TRUE (default) returns a data.frame and FALSE returns a matrix
+#' @param country column containing countries (applies only if d is a
+#' data.frame)
+#' @param product column containing products (applies only if d is a
+#' data.frame)
+#' @param value column containing traded values (applies only if d is a
+#' data.frame)
+#'
+#' @references
+#' For more information about complexity measures see:
+#'
+#' \insertRef{measuringcomplexity2015}{economiccomplexity}
+#'
+#' and the references therein.
+#'
+#' @examples
+#' complexity(ec_output_demo$rca)
+#'
+#' @return A list with four data frames or matrices.
+#'
+#' @seealso \code{\link[economiccomplexity]{rca}},
+#'
+#' @keywords functions
 #'
 #' @importFrom magrittr %>%
 #' @importFrom dplyr select mutate arrange pull rename
@@ -32,41 +54,29 @@
 #' @importFrom Matrix Matrix rowSums colSums t
 #' @importFrom rlang sym
 #'
-#' @examples
-#' ec_complexity_measures(
-#'   rca = ec_output_demo$rca_tbl,
-#'   tbl = TRUE
-#' )
-#'
-#' @references
-#' For more information on complexity measures, indices and its applications
-#' see:
-#'
-#' \insertRef{atlas2014}{economiccomplexity}
-#'
-#' \insertRef{measuringcomplexity2015}{economiccomplexity}
-#'
-#' @keywords functions
+#' @export
 
-ec_complexity_measures <- function(rca = NULL,
-                                   c = "country",
-                                   p = "product",
-                                   v = "value",
-                                   method = "fitness",
-                                   iterations = 20,
-                                   extremality = 1,
-                                   atlas = FALSE,
-                                   tbl = FALSE) {
+complexity <- function(rca,
+                       method = "fitness",
+                       iterations = 20,
+                       extremality = 1,
+                       atlas = FALSE,
+                       tbl = TRUE,
+                       country = "country",
+                       product = "product",
+                       value = "value") {
   # sanity checks ----
-  if (all(class(rca) %in% c(
-    "data.frame", "matrix", "dgeMatrix", "dsCMatrix",
-    "dgCMatrix"
-  ) == FALSE)) {
-    stop("rca must be a tibble/data.frame or a dense/sparse matrix")
+  if (all(class(rca) %in% c("data.frame", "matrix", "dgeMatrix", "dsCMatrix",
+    "dgCMatrix") == FALSE)) {
+    stop("rca must be a data frame or matrix")
+  }
+
+  if (!is.character(country) & !is.character(product) & !is.character(value)) {
+    stop("country, product and value must be character")
   }
 
   if (!(any(method %in% c("reflections", "eigenvalues", "fitness")) == TRUE)) {
-    stop("method must be reflections, eigenvalues or fitness")
+    stop("method must be 'fitness', 'reflections' or 'eigenvalues'")
   }
 
   if (is.integer(iterations) & !iterations >= 2) {
@@ -74,15 +84,15 @@ ec_complexity_measures <- function(rca = NULL,
   }
 
   if (!is.logical(tbl)) {
-    stop("tbl must be logical")
+    stop("tbl must be TRUE or FALSE")
   }
 
   # convert data.frame input to matrix ----
   if (is.data.frame(rca)) {
-    m <- tidyr::spread(rca, !!sym(p), !!sym(v))
-    m_rownames <- dplyr::select(m, !!sym(c)) %>% dplyr::pull()
+    m <- tidyr::spread(rca, !!sym(product), !!sym(value))
+    m_rownames <- dplyr::select(m, !!sym(country)) %>% dplyr::pull()
 
-    m <- dplyr::select(m, -!!sym(c)) %>% as.matrix()
+    m <- dplyr::select(m, -!!sym(country)) %>% as.matrix()
     m[is.na(m)] <- 0
     rownames(m) <- m_rownames
 
@@ -237,23 +247,15 @@ ec_complexity_measures <- function(rca = NULL,
   }
 
   if (tbl == TRUE) {
-    eci <- tibble::tibble(v = eci) %>%
-      dplyr::mutate(c = names(eci)) %>%
-      dplyr::select(!!sym("c"), !!sym("v")) %>%
-      dplyr::arrange(-!!sym("v")) %>%
-      dplyr::rename(
-        "country" = !!sym("c"),
-        "value" = !!sym("v")
-      )
+    eci <- tibble::tibble(value = eci) %>%
+      dplyr::mutate(country = names(eci)) %>%
+      dplyr::select(!!sym("country"), !!sym("value")) %>%
+      dplyr::arrange(-!!sym("value"))
 
-    pci <- tibble::tibble(v = pci) %>%
-      dplyr::mutate(p = names(pci)) %>%
-      dplyr::select(!!sym("p"), !!sym("v")) %>%
-      dplyr::arrange(-!!sym("v")) %>%
-      dplyr::rename(
-        "product" = !!sym("p"),
-        "value" = !!sym("v")
-      )
+    pci <- tibble::tibble(value = pci) %>%
+      dplyr::mutate(product = names(pci)) %>%
+      dplyr::select(!!sym("product"), !!sym("value")) %>%
+      dplyr::arrange(-!!sym("value"))
 
     kc0 <- tibble::enframe(kc0) %>%
       dplyr::rename("country" = !!sym("name"))
@@ -264,8 +266,8 @@ ec_complexity_measures <- function(rca = NULL,
 
   return(
     list(
-      complexity_index_c = eci,
-      complexity_index_p = pci,
+      complexity_c = eci,
+      complexity_p = pci,
       diversity = kc0,
       ubiquity = kp0
     )

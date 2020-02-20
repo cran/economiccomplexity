@@ -1,199 +1,81 @@
-#' @title Proximity
+#' Proximity
 #'
-#' @description \code{proximity} computes proximity
+#' @description \code{proximity()} computes two matrices that account for the
+#' similarity between pairs of countries and pairs of products.
 #'
-#' @details Given a data frame or matrix with RCA values and two data frames or
-#' vectors with diversity and ubiquity values or equivalent data frames, this
-#' function computes proximity by combining tidyverse tools and R base matrix
-#' functions.
+#' @details The current implementation follows
+#' \insertCite{atlas2014}{economiccomplexity} to obtain the likelihood that two
+#' products "p1" and "p2" are exported by the same country and, conversely,
+#' that two countries "c1" and "c2" export the same product.
 #'
-#' @param rca matrix or data.frame with RCA values
-#' @param diversity matrix or data.frame with diversity values
-#' @param ubiquity matrix or data.frame with ubiquity values
-#' @param compute "country", "product" or "both" (default) matrices
-#' @param tbl TRUE (default) returns a data.frame and FALSE returns a matrix
-#' @param country_r column containing countries (applies only if d is a
-#' data.frame)
-#' @param product_r column containing products (applies only if d is a
-#' data.frame)
-#' @param value_r column containing traded values (applies only if d is a
-#' data.frame)
-#' @param country_d column containing countries (applies only if d is a
-#' data.frame)
-#' @param value_d column containing values (applies only if d is a
-#' data.frame)
-#' @param product_u column containing products (applies only if d is a
-#' data.frame)
-#' @param value_u column containing values (applies only if d is a
-#' data.frame)
+#' @return A list of two matrices.
+#'
+#' @param balassa_index (Type: dgCMatrix) the output from
+#' \code{balassa_index()}) or an equivalent arrangement.
+#' @param compute (Type: character) the proximity to compute. By default this is
+#' \code{"both"} (both proximity matrices) but it can also be \code{"country"}
+#' or \code{"product"}.
+#'
+#' @importFrom Matrix t rowSums colSums crossprod tcrossprod
+#'
+#' @examples
+#' pro <- proximity(economiccomplexity_output$balassa_index)
+#'
+#' # partial view of proximity matrices
+#' pro$proximity_country[1:5,1:5]
+#' pro$proximity_product[1:5,1:5]
 #'
 #' @references
-#' For more information on proximity and its applications see:
+#' For more information see:
 #'
 #' \insertRef{atlas2014}{economiccomplexity}
 #'
 #' and the references therein.
 #'
-#' @examples
-#' proximity(
-#'   ec_output_demo$rca,
-#'   ec_output_demo$complexity$diversity,
-#'   ec_output_demo$complexity$ubiquity
-#' )
-#'
-#' @return A list with two data frames or matrices.
-#'
-#' @seealso \code{\link[economiccomplexity]{rca}},
-#' \code{\link[economiccomplexity]{complexity}}
-#'
 #' @keywords functions
-#'
-#' @importFrom magrittr %>%
-#' @importFrom dplyr select filter mutate pull
-#' @importFrom tibble as_tibble
-#' @importFrom tidyr gather
-#' @importFrom Matrix Matrix t rowSums colSums
-#' @importFrom rlang sym
 #'
 #' @export
 
-proximity <- function(rca,
-                      diversity,
-                      ubiquity,
-                      compute = "both",
-                      tbl = TRUE,
-                      country_r = "country",
-                      product_r = "product",
-                      value_r = "value",
-                      country_d = "country",
-                      value_d = "value",
-                      product_u = "product",
-                      value_u = "value") {
+proximity <- function(balassa_index, compute = "both") {
   # sanity checks ----
-  if (all(class(rca) %in% c("data.frame", "matrix", "dgeMatrix", "dsCMatrix",
-    "dgCMatrix") == FALSE)) {
-    stop("rca must be a data frame or matrix")
-  }
-
-  if (all(class(diversity) %in% c("numeric", "data.frame") == FALSE) &
-    all(class(ubiquity) %in% c("numeric", "data.frame") == FALSE)) {
-    stop("diversity and ubiquity must be data frames or numeric")
-  }
-
-  if (!is.logical(tbl)) {
-    stop("tbl must be TRUE or FALSE")
+  if (!(any(class(balassa_index) %in% "dgCMatrix") == TRUE)) {
+    stop("'balassa_index' must be a dgCMatrix")
   }
 
   if (!any(compute %in% c("both", "country", "product"))) {
-    stop("compute must be 'both', 'country' or 'product'")
-  }
-
-  # transformations if rca, d or u are data frames ----
-  if (is.data.frame(rca)) {
-    rca <- tidyr::spread(rca, !!sym(product_r), !!sym(value_r))
-
-    rca_rownames <- dplyr::select(rca, !!sym(country_r)) %>%
-      dplyr::pull()
-
-    rca <- dplyr::select(rca, -!!sym(country_r)) %>%
-      as.matrix()
-
-    rca[is.na(rca)] <- 0
-
-    rownames(rca) <- rca_rownames
-
-    rca <- Matrix::Matrix(rca, sparse = TRUE)
-    rca <- rca[Matrix::rowSums(rca) != 0, Matrix::colSums(rca) != 0]
-  } else {
-    rca <- rca[Matrix::rowSums(rca) != 0, Matrix::colSums(rca) != 0]
-  }
-
-  if (is.data.frame(diversity)) {
-    value_d <- dplyr::select(diversity, !!sym(value_d)) %>%
-      dplyr::pull()
-
-    names(value_d) <- dplyr::select(diversity, !!sym(country_d)) %>%
-      dplyr::pull()
-
-    diversity <- value_d
-  }
-
-  if (is.data.frame(ubiquity)) {
-    value_u <- dplyr::select(ubiquity, !!sym(value_u)) %>%
-      dplyr::pull()
-
-    names(value_u) <- dplyr::select(ubiquity, !!sym(product_u)) %>%
-      dplyr::pull()
-
-    ubiquity <- value_u
+    stop("'compute' must be 'both', 'country' or 'product'")
   }
 
   # compute proximity matrices ----
-
   if (compute == "both") {
     compute2 <- c("country", "product")
   } else {
     compute2 <- compute
   }
 
-  # remove countries not included in complexity measures
-  # (i.e allows to compute after setting atlas= TRUE)
-  if (!is.null(diversity)) {
-    rca <- rca[rownames(rca) %in% names(diversity), ]
-  }
+  balassa_index <- balassa_index[rowSums(balassa_index) != 0, colSums(balassa_index) != 0]
 
-  if (!is.null(ubiquity)) {
-    rca <- rca[, colnames(rca) %in% names(ubiquity)]
-  }
+  balassa_sum_country <- rowSums(balassa_index)
+  balassa_sum_product <- colSums(balassa_index)
 
   if (any("country" %in% compute2) == TRUE) {
-    xc <- rca %*% Matrix::t(rca)
-
-    yc <- outer(diversity, diversity, pmax)
-
-    if (tbl == FALSE) {
-      cp <- Matrix::Matrix(xc / yc, sparse = TRUE)
-    } else {
-      cp <- xc / yc
-
-      cp[upper.tri(cp, diag = TRUE)] <- 0
-
-      cp <- as.matrix(cp) %>%
-        dplyr::as_tibble() %>%
-        dplyr::mutate(from = rownames(cp)) %>%
-        tidyr::gather(!!sym("to"), !!sym("value"), -!!sym("from")) %>%
-        dplyr::filter(!!sym("value") > 0)
-    }
+    prox_x <- tcrossprod(balassa_index, balassa_index) / outer(balassa_sum_country, balassa_sum_country, pmax)
+    prox_x <- Matrix(prox_x, sparse = TRUE)
   } else {
-    cp <- NULL
+    prox_x <- NULL
   }
 
   if (any("product" %in% compute2) == TRUE) {
-    xp <- Matrix::t(rca) %*% rca
-
-    yp <- outer(ubiquity, ubiquity, pmax)
-
-    if (tbl == FALSE) {
-      pp <- Matrix::Matrix(xp / yp, sparse = TRUE)
-    } else {
-      pp <- xp / yp
-
-      pp[upper.tri(pp, diag = TRUE)] <- 0
-
-      pp <- as.matrix(pp) %>%
-        dplyr::as_tibble() %>%
-        dplyr::mutate(from = rownames(pp)) %>%
-        tidyr::gather(!!sym("to"), !!sym("value"), -!!sym("from")) %>%
-        dplyr::filter(!!sym("value") > 0)
-    }
+    prox_y <- crossprod(balassa_index, balassa_index) / outer(balassa_sum_product, balassa_sum_product, pmax)
+    prox_y <- Matrix(prox_y, sparse = TRUE)
   } else {
-    pp <- NULL
+    prox_y <- NULL
   }
 
   return(
     list(
-      proximity_c = cp,
-      proximity_p = pp
+      proximity_country = prox_x,
+      proximity_product = prox_y
     )
   )
 }

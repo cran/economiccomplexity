@@ -4,72 +4,42 @@
 \alias{proximity}
 \title{Proximity}
 \usage{
-proximity(rca, diversity, ubiquity, compute = "both", tbl = TRUE,
-  country_r = "country", product_r = "product", value_r = "value",
-  country_d = "country", value_d = "value", product_u = "product",
-  value_u = "value")
+proximity(balassa_index, compute = "both")
 }
 \arguments{
-\item{rca}{matrix or data.frame with RCA values}
+\item{balassa_index}{(Type: dgCMatrix) the output from
+\code{balassa_index()}) or an equivalent arrangement.}
 
-\item{diversity}{matrix or data.frame with diversity values}
-
-\item{ubiquity}{matrix or data.frame with ubiquity values}
-
-\item{compute}{"country", "product" or "both" (default) matrices}
-
-\item{tbl}{TRUE (default) returns a data.frame and FALSE returns a matrix}
-
-\item{country_r}{column containing countries (applies only if d is a
-data.frame)}
-
-\item{product_r}{column containing products (applies only if d is a
-data.frame)}
-
-\item{value_r}{column containing traded values (applies only if d is a
-data.frame)}
-
-\item{country_d}{column containing countries (applies only if d is a
-data.frame)}
-
-\item{value_d}{column containing values (applies only if d is a
-data.frame)}
-
-\item{product_u}{column containing products (applies only if d is a
-data.frame)}
-
-\item{value_u}{column containing values (applies only if d is a
-data.frame)}
+\item{compute}{(Type: character) the proximity to compute. By default this is
+\code{"both"} (both proximity matrices) but it can also be \code{"country"}
+or \code{"product"}.}
 }
 \value{
-A list with two data frames or matrices.
+A list of two matrices.
 }
 \description{
-\code{proximity} computes proximity
+\code{proximity()} computes two matrices that account for the
+similarity between pairs of countries and pairs of products.
 }
 \details{
-Given a data frame or matrix with RCA values and two data frames or
-vectors with diversity and ubiquity values or equivalent data frames, this
-function computes proximity by combining tidyverse tools and R base matrix
-functions.
+The current implementation follows
+\insertCite{atlas2014}{economiccomplexity} to obtain the likelihood that two
+products "p1" and "p2" are exported by the same country and, conversely,
+that two countries "c1" and "c2" export the same product.
 }
 \examples{
-proximity(
-  ec_output_demo$rca,
-  ec_output_demo$complexity$diversity,
-  ec_output_demo$complexity$ubiquity
-)
+pro <- proximity(economiccomplexity_output$balassa_index)
+
+# partial view of proximity matrices
+pro$proximity_country[1:5,1:5]
+pro$proximity_product[1:5,1:5]
 
 }
 \references{
-For more information on proximity and its applications see:
+For more information see:
 
 \insertRef{atlas2014}{economiccomplexity}
 
 and the references therein.
-}
-\seealso{
-\code{\link[economiccomplexity]{rca}},
-\code{\link[economiccomplexity]{complexity}}
 }
 \keyword{functions}

@@ -1,98 +1,70 @@
-#' @title Country-product bipartite network projections
+#' Projections of a Country-Product Network
 #'
-#' @description \code{rca} computes complexity indices following the definitions
-#' from \insertCite{measuringcomplexity2015;textual}{economiccomplexity}
+#' @description \code{projections()} computes two graphs that are particularly
+#' useful to visualize product-product and country-country similarity.
 #'
-#' @details Given a two data frames or matrices with proximity values, this
-#' function obtains a simplified network in two steps:
+#' @details The current implementation follows
+#' \insertCite{atlas2014}{economiccomplexity} to create simplified graphs
+#' that correspond to a simplification of the proximity matrices. The result is
+#' obtained by iterating and reducing links until the desired average number of
+#' links per node is obtained, or a spaning tree after the strongest links is
+#' returned when is not possible to return the desired network.
 #'
-#' 1) Creates a network skeleton by appliying the minimum spanning tree
-#' algorithm from the igraph package, but multiplying proximities by minus one,
-#' so that the strongest links are considered for the network skeleton.
+#' @return A list of two graphs.
 #'
-#' 2) Appends additional links to the skeleton by aading the links with
-#' proximity values above a user-defined cutoff.
+#' @param proximity_country (Type: dgCMatrix) the output from
+#' \code{proximity()}) or an equivalent arrangement.
+#' @param proximity_product (Type: dgCMatrix) the output from
+#' \code{proximity()}) or an equivalent arrangement.
+#' @param avg_links average number of connections for the projections.
+#' By default this is set to \code{5}.
+#' @param tolerance tolerance for proximity variation on each iteration until
+#' obtaining the desired average number of connections.
+#' By default this is set to \code{0.05}.
+#' @param compute (Type: character) the proximity to compute. By default this is
+#' \code{"both"} (both projections) but it can also be \code{"country"}
+#' or \code{"product"}.
 #'
-#' @param proximity_c matrix or data frame with product proximity values
-#' @param proximity_p matrix or data frame with country proximity values
-#' @param cutoff_c all the links with a proximity below this value will be
-#' removed from the country projection (by default is 0.2)
-#' @param cutoff_p all the links with a proximity below this value will be
-#' removed from the product projection (by default is 0.4)
-#' @param compute "country", "product" or "both" (default) projections
-#' @param tbl TRUE (default) returns a data.frame and FALSE returns a matrix
-#' @param from_c column containing origin (applies only if proximity_c is a
-#' data.frame)
-#' @param to_c column containing destination (applies only if proximity_c is a
-#' data.frame)
-#' @param value_c column containing proximity values (applies only if
-#' proximity_c is a data.frame)
-#' @param from_p column containing origin (applies only if proximity_p is a
-#' data.frame)
-#' @param to_p column containing destination (applies only if proximity_p is a
-#' data.frame)
-#' @param value_p column containing proximity values (applies only if
-#' proximity_p is a data.frame)
+#' @importFrom igraph graph_from_adjacency_matrix mst
+#' degree delete.edges graph.difference graph.union remove.edge.attribute E E<-
+#'
+#' @examples
+#' net <- projections(
+#'  economiccomplexity_output$proximity$proximity_country,
+#'  economiccomplexity_output$proximity$proximity_product,
+#'  avg_links = 10,
+#'  tolerance = 0.1
+#' )
+#'
+#' # partial view of projections
+#' igraph::E(net$network_country)[1:5]
+#' igraph::E(net$network_product)[1:5]
 #'
 #' @references
-#' For more information about visualizing bipartite networks projections see:
-#'
-#' \insertRef{human2007}{economiccomplexity}
+#' For more information see:
 #'
 #' \insertRef{atlas2014}{economiccomplexity}
 #'
 #' and the references therein.
 #'
-#' @examples
-#' projections(
-#'   ec_output_demo$proximity$proximity_c,
-#'   ec_output_demo$proximity$proximity_p
-#' )
-#'
-#' @return A list with two data frames or matrices.
-#'
-#' @seealso \code{\link[economiccomplexity]{proximity}}
-#'
 #' @keywords functions
-#'
-#' @importFrom magrittr %>%
-#' @importFrom dplyr as_tibble select filter mutate rename bind_rows
-#' @importFrom tidyr gather
-#' @importFrom igraph graph_from_data_frame mst as_data_frame simplify
-#' @importFrom rlang sym syms
 #'
 #' @export
 
-projections <- function(proximity_c,
-                        proximity_p,
-                        cutoff_c = 0.2,
-                        cutoff_p = 0.4,
-                        compute = "both",
-                        tbl = TRUE,
-                        from_c = "from",
-                        to_c = "to",
-                        value_c = "value",
-                        from_p = "from",
-                        to_p = "to",
-                        value_p = "value") {
+projections <- function(proximity_country, proximity_product,
+                        avg_links = 5, tolerance = 0.05, compute = "both") {
   # sanity checks ----
-  if (all(class(proximity_c) %in% c("data.frame", "matrix", "dgeMatrix",
-    "dgCMatrix", "dsCMatrix") == FALSE) &
-    all(class(proximity_p) %in% c("data.frame", "matrix", "dgeMatrix",
-      "dgCMatrix", "dsCMatrix") == FALSE)) {
-    stop("proximity_c and proximity_p must be data frames or matrices")
+  if (!(any(class(proximity_country) %in% "dsCMatrix") == TRUE) |
+      !(any(class(proximity_product) %in% "dsCMatrix") == TRUE)) {
+    stop("'proximity_country' and 'proximity_product' must be dsCMatrix")
   }
 
-  if (!is.numeric(cutoff_c) & !is.numeric(cutoff_p)) {
-    stop("cutoff_c and cutoff_p must be numeric")
-  }
-
-  if (!is.logical(tbl)) {
-    stop("tbl must be TRUE or FALSE")
+  if (!is.numeric(avg_links)) {
+    stop("'avg_links' must be numeric")
   }
 
   if (!any(compute %in% c("both", "country", "product"))) {
-    stop("compute must be 'both', 'country' or 'product'")
+    stop("'compute' must be 'both', 'country' or 'product'")
   }
 
   if (compute == "both") {
@@ -101,108 +73,65 @@ projections <- function(proximity_c,
     compute2 <- compute
   }
 
+  trim_network <- function(proximity_mat, proximity_avg) {
+    proximity_mat <- (-1) * proximity_mat
+
+    g <- graph_from_adjacency_matrix(proximity_mat, weighted = TRUE, mode = "undirected", diag = FALSE)
+
+    g_mst <- mst(g, algorithm = "prim")
+
+    threshold <- 0
+    avg_links_n <- FALSE
+
+    while (avg_links_n == FALSE) {
+      if (threshold < 1) {
+        message(sprintf("%s threshold...", threshold))
+
+        g_not_in_mst <- delete.edges(g, which(abs(E(g)$weight) <= threshold))
+        g_not_in_mst <- graph.difference(g_not_in_mst, g_mst)
+
+        g <- graph.union(g_mst, g_not_in_mst)
+        E(g)$weight <- pmin(E(g)$weight_1, E(g)$weight_2, na.rm = T)
+        g <- remove.edge.attribute(g, "weight_1")
+        g <- remove.edge.attribute(g, "weight_2")
+
+        avg_links_n <- ifelse(mean(degree(g)) <= avg_links, TRUE, FALSE)
+        threshold <- threshold + tolerance
+
+        if (avg_links_n == TRUE) {
+          message(sprintf("%s threshold achieves the avg number of connections", threshold))
+          E(g)$weight <- (-1) * E(g)$weight
+          return(g)
+        }
+      } else {
+        warning("no threshold achieves the avg number of connections\nreturning maximum spanning tree")
+        avg_links_n <- TRUE
+        E(g_mst)$weight <- (-1) * E(g_mst)$weight
+        return(g_mst)
+      }
+    }
+  }
+
   if (any("country" %in% compute2) == TRUE) {
-    # arrange country matrix ----
-    if (any(class(proximity_c) %in% c("dgeMatrix",
-      "dgCMatrix", "dsCMatrix") == TRUE)) {
-      proximity_c <- as.matrix(proximity_c)
-    }
-
-    if (is.matrix(proximity_c)) {
-      proximity_c[upper.tri(proximity_c, diag = TRUE)] <- 0
-      row_names <- rownames(proximity_c)
-
-      proximity_c <- proximity_c %>%
-        dplyr::as_tibble() %>%
-        dplyr::mutate(from = row_names) %>%
-        tidyr::gather(!!sym("to"), !!sym("value"), -!!sym("from")) %>%
-        dplyr::filter(!!sym("value") > 0)
-    }
-
-    # compute country network ----
-    proximity_c <- proximity_c %>%
-      dplyr::select(!!!syms(c(from_c, to_c, value_c))) %>%
-      dplyr::rename(from = from_c, to = to_c, value = value_c) %>%
-      dplyr::mutate(value = -1 * !!sym("value"))
-
-    c_g <- igraph::graph_from_data_frame(proximity_c, directed = FALSE)
-
-    c_mst <- igraph::mst(c_g, weights = proximity_c$value, algorithm = "prim")
-    c_mst <- igraph::as_data_frame(c_mst)
-
-    c_g_nmst <- proximity_c %>%
-      dplyr::filter(!!sym("value") <= -1 * cutoff_c) %>%
-      dplyr::anti_join(c_mst, by = c("from", "to"))
-
-    c_g <- dplyr::bind_rows(c_mst, c_g_nmst)
-    c_g <- dplyr::mutate(c_g, value = -1 * !!sym("value"))
-
-    c_g <- igraph::graph_from_data_frame(c_g, directed = FALSE)
-    c_g <- igraph::simplify(c_g,
-      remove.multiple = TRUE, remove.loops = TRUE,
-      edge.attr.comb = "first"
-    )
-
-    if (tbl == TRUE) {
-      c_g <- igraph::as_data_frame(c_g) %>% dplyr::as_tibble()
-    }
+    message("computing product projection...")
+    message(rep("-", 50))
+    xg <- trim_network(proximity_country, avg_links)
   } else {
-    c_g <- NULL
+    xg <- NULL
   }
 
   if (any("product" %in% compute2) == TRUE) {
-    # arrange products matrix ----
-    if (any(class(proximity_p) %in% c("dgeMatrix",
-      "dgCMatrix", "dsCMatrix") == TRUE)) {
-      proximity_p <- as.matrix(proximity_p)
-    }
-
-    if (is.matrix(proximity_p)) {
-      proximity_p[upper.tri(proximity_p, diag = TRUE)] <- 0
-      row_names <- rownames(proximity_p)
-
-      proximity_p <- proximity_p %>%
-        dplyr::as_tibble() %>%
-        dplyr::mutate(from = row_names) %>%
-        tidyr::gather(!!sym("to"), !!sym("value"), -!!sym("from")) %>%
-        dplyr::filter(!!sym("value") > 0)
-    }
-
-    # compute products network ----
-    proximity_p <- proximity_p %>%
-      dplyr::select(!!!syms(c(from_p, to_p, value_p))) %>%
-      dplyr::rename(from = from_p, to = to_p, value = value_p) %>%
-      dplyr::mutate(value = -1 * !!sym("value"))
-
-    p_g <- igraph::graph_from_data_frame(proximity_p, directed = FALSE)
-
-    p_mst <- igraph::mst(p_g, weights = proximity_p$value, algorithm = "prim")
-    p_mst <- igraph::as_data_frame(p_mst)
-
-    p_g_nmst <- proximity_p %>%
-      dplyr::filter(!!sym("value") <= -1 * cutoff_p) %>%
-      dplyr::anti_join(p_mst, by = c("from", "to"))
-
-    p_g <- dplyr::bind_rows(p_mst, p_g_nmst)
-    p_g <- dplyr::mutate(p_g, value = -1 * !!sym("value"))
-
-    p_g <- igraph::graph_from_data_frame(p_g, directed = FALSE)
-    p_g <- igraph::simplify(p_g,
-      remove.multiple = TRUE, remove.loops = TRUE,
-      edge.attr.comb = "first"
-    )
-
-    if (tbl == TRUE) {
-      p_g <- igraph::as_data_frame(p_g) %>% dplyr::as_tibble()
-    }
+    message("computing product projection...")
+    message(rep("-", 50))
+    yg <- trim_network(proximity_product, avg_links)
   } else {
-    p_g <- NULL
+    yg <- NULL
   }
 
   return(
     list(
-      projection_c = c_g,
-      projection_p = p_g
+      network_country = xg,
+      network_product = yg
     )
   )
 }

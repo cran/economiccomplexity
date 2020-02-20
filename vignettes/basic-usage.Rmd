@@ -1,11 +1,11 @@
 ---
-title: "How to use this package"
+title: "How To Use This Package"
 author: "Mauricio Vargas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 bibliography: ../inst/REFERENCES.bib
 vignette: >
-  %\VignetteIndexEntry{How to use this package}
+  %\VignetteIndexEntry{How To Use This Package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,99 +14,188 @@ vignette: >
 knitr::opts_chunk$set(eval = TRUE, message = FALSE, warning = FALSE)
 ```
 
-# Basic trade example
+# World Trade and Per-Capita GDP
 
-## Package data
+This example is inspired after the visualizations from @atlas2014 with some
+ggplot additions.
 
-I'll use this demo dataset to illustrate the essential usage of the functions
-within this package.
+## Package Data
 
 ```{r}
 library(economiccomplexity)
-ec_trade_1962
+
+# partial view of trade matrix
+head(world_trade_avg_1998_to_2000)
+
+# partial view of gdp vector
+head(world_gdp_avg_1998_to_2000)
 ```
 
-## Revealed comparative Advantage (RCA)
+## Balassa Index
 
-You can obtain RCA with `ec_rca()`.
+You can obtain Balassa Index with `balassa_index()`.
 
 ```{r}
-r <- rca(ec_trade_1962)
-r
+bi <- balassa_index(world_trade_avg_1998_to_2000)
+
+# partial view of index
+head(bi)
 ```
 
-Another possibility is to obtain RCA as a matrix or tibble without discretization.
+Another possibility is to obtain Balassa Index without discretization.
 
 ```{r}
-r2 <- rca(ec_trade_1962, discrete = F)
-r2
+bi_dec <- balassa_index(world_trade_avg_1998_to_2000, discrete = F)
+
+# partial view of index
+head(bi_dec)
 ```
 
 ## Complexity Measures
 
-You can compute both Economic Complexity Index (ECI) and Product Complexity
-Index (PCI) by using `ec_complexity_measures()`. The calculations methods are
-*fitness* (default), *reflections* and *eigenvalues*. See [@atlas2014] and
-[@measuringcomplexity2015] for the methodological details.
+You can compute complexity indexes (e.g. such as the Economic Complexity Index and Product Complexity Index) by using `complexity_measures()`. The calculations methods are *fitness* (default), *reflections*, *eigenvalues*. See [@measuringcomplexity2015] for the methodological details.
+
+The eigenvalues also calls the reflections methods in order to correct the index sign
+in some special cases when the correlation between the output from both methods is negative.
+
+###  Complexity-Fitness
 
 ```{r}
-c <- complexity(r)
-c
+com_fit <- complexity_measures(bi)
+
+# partial view of indexes
+com_fit$complexity_index_country[1:5]
+com_fit$complexity_index_product[1:5]
+```
+
+### Reflections
+
+```{r}
+com_ref <- complexity_measures(bi, method = "reflections")
+
+# partial view of indexes
+com_ref$complexity_index_country[1:5]
+com_ref$complexity_index_product[1:5]
+```
+
+### Eigenvalues
+
+```{r}
+com_eig <- complexity_measures(bi, method = "eigenvalues")
+
+# partial view of indexes
+com_eig$complexity_index_country[1:5]
+com_eig$complexity_index_product[1:5]
 ```
 
 ## Proximity
 
-Proximity matrices are used to create both country-country and product-product
-networks. Using `proximity_matrices()` is straightforward.
+Proximity matrices are used to create projections e.g. (country-country and product-product
+networks) for bipartite networks. Using `proximity()` is straightforward.
 
 ```{r}
-p <- proximity(r, c$diversity, c$ubiquity)
-p
+pro <- proximity(bi)
+
+# partial view of proximity matrices
+pro$proximity_country[1:5,1:5]
+pro$proximity_product[1:5,1:5]
 ```
 
-## Networks
+## Projections
 
-The `proximity_networks()` function is designed to use `igraph` for the internal
+The `projections()` function is designed to use `igraph` for the internal
 computations and also to pass proximity-based networks to `igraph`, `ggraph`
 or export to Cytoscape by saving the output as csv/tsv.
 
-To create some reduced networks I'll use a high proximity cutoff, so that the networks are limited to the spanning trees for clarity and fast rendering.
-
 ```{r}
-pr <- projections(p$proximity_c, p$proximity_p, 1, 1)
-pr
+library(igraph)
+
+net <- projections(pro$proximity_country, pro$proximity_product)
+
+# partial view of projections
+E(net$network_country)[1:5]
+E(net$network_product)[1:5]
 ```
 
 Just two basic examples with `ggraph`.
-
-```{r, fig.width=20, fig.height=12}
-library(igraph)
-library(ggraph)
-library(magrittr)
-
+```{r, fig.width=7, fig.height=7}
 set.seed(200100)
 
-pr$projection_c %>%
-  graph_from_data_frame(directed = F) %>%
-  ggraph(layout = "kk") +
-  geom_edge_link(aes(edge_alpha = value, edge_width = value),
-                 edge_colour = "#a8a8a8") +
-  geom_node_point(color = "darkslategray4", size = 8) +
-  geom_node_text(aes(label = name), vjust = 2.2) +
-  ggtitle("Country projection") +
+library(Matrix)
+library(ggraph)
+
+aggregated_countries <- aggregate(
+  world_trade_avg_1998_to_2000$value,
+  by = list(country = world_trade_avg_1998_to_2000$country),
+  FUN = sum
+)
+
+aggregated_countries <- setNames(aggregated_countries$x, aggregated_countries$country)
+
+V(net$network_country)$size <- aggregated_countries[match(V(net$network_country)$name, names(aggregated_countries))]
+
+ggraph(net$network_country, layout = "kk") +
+  # geom_edge_link(aes(edge_width = weight), edge_colour = "#a8a8a8") +
+  geom_edge_link(edge_colour = "#a8a8a8") +
+  geom_node_point(aes(size = size), color = "#86494d") +
+  geom_node_text(aes(label = name), size = 2, vjust = 2.2) +
+  ggtitle("Proximity Based Network Projection for Countries") +
   theme_void()
 ```
 
-```{r, fig.width=20, fig.height=12}
-pr$projection_p %>%
-  graph_from_data_frame(directed = F) %>%
-  ggraph(layout = "kk") +
-  geom_edge_link(aes(edge_alpha = value, edge_width = value),
-                 edge_colour = "#a8a8a8") +
-  geom_node_point(color = "darkslategray4", size = 4) +
-  geom_node_text(aes(label = name), vjust = 2.2) +
-  ggtitle("Product projection") +
+```{r, fig.width=10, fig.height=10}
+set.seed(200100)
+
+aggregated_products <- aggregate(
+  world_trade_avg_1998_to_2000$value,
+  by = list(country = world_trade_avg_1998_to_2000$product),
+  FUN = sum
+)
+
+aggregated_products <- setNames(aggregated_products$x, aggregated_products$country)
+
+V(net$network_product)$size <- aggregated_products[match(V(net$network_product)$name, names(aggregated_products))]
+
+ggraph(net$network_product, layout = "kk") +
+  # geom_edge_link(aes(edge_width = weight), edge_colour = "#a8a8a8") +
+  geom_edge_link(edge_colour = "#a8a8a8") +
+  geom_node_point(aes(size = size), color = "#86494d") +
+  geom_node_text(aes(label = name), size = 2, vjust = 2.2) +
+  ggtitle("Proximity Based Network Projection for Products") +
   theme_void()
+```
+
+# Complexity Outlook
+
+Both the Complexity Outlook Index and Complexity Outlook Gain are obtained
+after the `complexity_outlook()` function.
+
+```{r}
+co <- complexity_outlook(
+  economiccomplexity_output$balassa_index,
+  economiccomplexity_output$proximity$proximity_product,
+  economiccomplexity_output$complexity_measures$complexity_index_product
+)
+
+# partial view of complexity outlook
+co$complexity_outlook_index[1:5]
+co$complexity_outlook_gain[1:5,1:5]
+```
+
+# Productivy Levels
+
+The `productivity_levels()` dataset follows the definitions from @atlas2014
+and @exportmatters2005.
+
+I don't have a per-capita GDP dataset for the Galactic Federation, so
+I'll create simulated data for the example.
+
+```{r}
+pl <- productivity_levels(world_trade_avg_1998_to_2000, world_gdp_avg_1998_to_2000)
+
+# partial view of productivity levels
+pl$productivity_level_country[1:5]
+pl$productivity_level_product[1:5]
 ```
 
 # References

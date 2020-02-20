@@ -2,81 +2,67 @@
 % Please edit documentation in R/projections.R
 \name{projections}
 \alias{projections}
-\title{Country-product bipartite network projections}
+\title{Projections of a Country-Product Network}
 \usage{
-projections(proximity_c, proximity_p, cutoff_c = 0.2, cutoff_p = 0.4,
-  compute = "both", tbl = TRUE, from_c = "from", to_c = "to",
-  value_c = "value", from_p = "from", to_p = "to",
-  value_p = "value")
+projections(
+  proximity_country,
+  proximity_product,
+  avg_links = 5,
+  tolerance = 0.05,
+  compute = "both"
+)
 }
 \arguments{
-\item{proximity_c}{matrix or data frame with product proximity values}
+\item{proximity_country}{(Type: dgCMatrix) the output from
+\code{proximity()}) or an equivalent arrangement.}
 
-\item{proximity_p}{matrix or data frame with country proximity values}
+\item{proximity_product}{(Type: dgCMatrix) the output from
+\code{proximity()}) or an equivalent arrangement.}
 
-\item{cutoff_c}{all the links with a proximity below this value will be
-removed from the country projection (by default is 0.2)}
+\item{avg_links}{average number of connections for the projections.
+By default this is set to \code{5}.}
 
-\item{cutoff_p}{all the links with a proximity below this value will be
-removed from the product projection (by default is 0.4)}
+\item{tolerance}{tolerance for proximity variation on each iteration until
+obtaining the desired average number of connections.
+By default this is set to \code{0.05}.}
 
-\item{compute}{"country", "product" or "both" (default) projections}
-
-\item{tbl}{TRUE (default) returns a data.frame and FALSE returns a matrix}
-
-\item{from_c}{column containing origin (applies only if proximity_c is a
-data.frame)}
-
-\item{to_c}{column containing destination (applies only if proximity_c is a
-data.frame)}
-
-\item{value_c}{column containing proximity values (applies only if
-proximity_c is a data.frame)}
-
-\item{from_p}{column containing origin (applies only if proximity_p is a
-data.frame)}
-
-\item{to_p}{column containing destination (applies only if proximity_p is a
-data.frame)}
-
-\item{value_p}{column containing proximity values (applies only if
-proximity_p is a data.frame)}
+\item{compute}{(Type: character) the proximity to compute. By default this is
+\code{"both"} (both projections) but it can also be \code{"country"}
+or \code{"product"}.}
 }
 \value{
-A list with two data frames or matrices.
+A list of two graphs.
 }
 \description{
-\code{rca} computes complexity indices following the definitions
-from \insertCite{measuringcomplexity2015;textual}{economiccomplexity}
+\code{projections()} computes two graphs that are particularly
+useful to visualize product-product and country-country similarity.
 }
 \details{
-Given a two data frames or matrices with proximity values, this
-function obtains a simplified network in two steps:
-
-1) Creates a network skeleton by appliying the minimum spanning tree
-algorithm from the igraph package, but multiplying proximities by minus one,
-so that the strongest links are considered for the network skeleton.
-
-2) Appends additional links to the skeleton by aading the links with
-proximity values above a user-defined cutoff.
+The current implementation follows
+\insertCite{atlas2014}{economiccomplexity} to create simplified graphs
+that correspond to a simplification of the proximity matrices. The result is
+obtained by iterating and reducing links until the desired average number of
+links per node is obtained, or a spaning tree after the strongest links is
+returned when is not possible to return the desired network.
 }
 \examples{
-projections(
-  ec_output_demo$proximity$proximity_c,
-  ec_output_demo$proximity$proximity_p
+net <- projections(
+ economiccomplexity_output$proximity$proximity_country,
+ economiccomplexity_output$proximity$proximity_product,
+ avg_links = 10,
+ tolerance = 0.1
 )
+
+# partial view of projections
+igraph::E(net$network_country)[1:5]
+igraph::E(net$network_product)[1:5]
 
 }
 \references{
-For more information about visualizing bipartite networks projections see:
-
-\insertRef{human2007}{economiccomplexity}
+For more information see:
 
 \insertRef{atlas2014}{economiccomplexity}
 
 and the references therein.
-}
-\seealso{
-\code{\link[economiccomplexity]{proximity}}
 }
 \keyword{functions}

@@ -1,4 +1,4 @@
-bf2cff9da8ed7b8410e794363792b851 *DESCRIPTION
+14786b9cd1ebf9e364ef105166dc948b *DESCRIPTION
 ecf7c6db5e155d974103fa3265dc81a7 *NAMESPACE
 a8f5b57b4a5904f39e94148ef224f771 *R/balassa_index.R
 7cf47425fd27c424c7aa907af5d4886f *R/complexity_measures.R
@@ -7,15 +7,15 @@ ef147bd1e004f3dbc304f1612ba543e0 *R/economiccomplexity-internals.R
 8fcfd5410d81e424bf36c3cdc87890ce *R/productivity_levels.R
 ff6d71e15d31894096fe1237ef59f2cf *R/projections.R
 e82af7e89cf048ce8934faffe8685fac *R/proximity.R
-5f20f3a29c2089787367c3d83ed5262d *build/partial.rdb
-26788c71a91a4a9710d3d1c41a31bb59 *build/vignette.rds
+b60ca5b96d18d414739005673b5afcd7 *build/partial.rdb
+0092161d89cc7c890de90d669c009d52 *build/vignette.rds
 2f081ca67816c7b611729f8499ef2c14 *data/economiccomplexity_output.rda
 f673d9977d8819406eac2d28d58e00c2 *data/world_gdp_avg_1998_to_2000.rda
 e324596405f15807c465b1bea6f10e2c *data/world_trade_avg_1998_to_2000.rda
 75c66b8ff60b474480f9ead1927c6d5b *inst/REFERENCES.bib
-6e1d80b3f33d70606ce47725d94a0840 *inst/doc/basic-usage.R
-0cb838c2c702762548dddb76efbef2ac *inst/doc/basic-usage.Rmd
-63648c9b9d82d5532b708354a0385a06 *inst/doc/basic-usage.html
+6e1d80b3f33d70606ce47725d94a0840 *inst/doc/economiccomplexity.R
+0cb838c2c702762548dddb76efbef2ac *inst/doc/economiccomplexity.Rmd
+c8388b560bc2177bfd49167db1d03ed2 *inst/doc/economiccomplexity.html
 26cce405a568b5a6fa87b9a09f9f0550 *inst/paper.md
 4fd6bf74a717d146ee2416881616639c *inst/paper.pdf
 ddd699a2171fc46d47cef550e0e48b14 *man/balassa_index.Rd
@@ -41,4 +41,4 @@ e6f88bdbb9effa90b9537b45f117580a *tests/testthat/test-complexity_outlook.R
 e6d6c4aeb6edcd241a9a59a41e1dabd6 *tests/testthat/test-productivity_levels.R
 c264e8a8acdfbe5b3524c60fdef8551e *tests/testthat/test-projections.R
 9da2bc2dee7d1e5d87472f0bf5f74f19 *tests/testthat/test-proximity.R
-0cb838c2c702762548dddb76efbef2ac *vignettes/basic-usage.Rmd
+0cb838c2c702762548dddb76efbef2ac *vignettes/economiccomplexity.Rmd

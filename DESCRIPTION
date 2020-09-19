@@ -1,7 +1,7 @@
 Package: economiccomplexity
 Type: Package
 Title: Computational Methods for Economic Complexity
-Version: 1.0
+Version: 1.1
 Authors@R: c(
     person(given = "Mauricio",
       family = "Vargas",
@@ -42,15 +42,15 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.5)
-Imports: Matrix, igraph
-Suggests: testthat (>= 2.1.0), knitr, Rdpack, ggraph
-URL: https://pachamaltese.github.io/economiccomplexity
-BugReports: http://github.com/pachamaltese/economiccomplexity/issues
+Imports: Matrix, igraph, Rdpack
+Suggests: testthat (>= 2.1.0), knitr, markdown, ggraph
+URL: https://pacha.dev/economiccomplexity/
+BugReports: https://github.com/pachamaltese/economiccomplexity/issues/
 RdMacros: Rdpack
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2020-02-20 03:56:26 UTC; pacha
+Packaged: 2020-09-18 15:50:11 UTC; pacha
 Author: Mauricio Vargas [aut, cre, cph]
     (<https://orcid.org/0000-0003-1017-7574>),
   Carlo Bottai [ctb] (improved the eigenvalues calculation),
@@ -61,4 +61,4 @@ Author: Mauricio Vargas [aut, cre, cph]
   Open Trade Statistics [dtc] (World Trade dataset)
 Maintainer: Mauricio Vargas <mvargas@dcc.uchile.cl>
 Repository: CRAN
-Date/Publication: 2020-02-20 05:50:02 UTC
+Date/Publication: 2020-09-19 22:20:17 UTC

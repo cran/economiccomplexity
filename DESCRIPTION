@@ -1,12 +1,12 @@
 Package: economiccomplexity
 Type: Package
 Title: Computational Methods for Economic Complexity
-Version: 1.4.0
+Version: 1.5.0
 Authors@R: c(
     person(given = "Mauricio",
-      family = "Vargas",
+      family = "Vargas Sepulveda",
       role = c("aut", "cre", "cph"),
-      email = "hello+r@pacha.dev",
+      email = "m.sepulveda@mail.utoronto.ca",
       comment = c(ORCID = "0000-0003-1017-7574")
     ),
     person(given = "Carlo",
@@ -44,15 +44,15 @@ Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.5)
 Imports: Matrix, igraph, Rdpack
-Suggests: testthat (>= 2.1.0), knitr, ggraph, rmarkdown, covr
+Suggests: testthat (>= 2.1.0), knitr, ggplot2, ggraph, rmarkdown, covr
 URL: https://pacha.dev/economiccomplexity/
 BugReports: https://github.com/pachadotdev/economiccomplexity/issues/
 RdMacros: Rdpack
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2022-09-03 21:25:14 UTC; pacha
-Author: Mauricio Vargas [aut, cre, cph]
+Packaged: 2023-08-07 17:27:25 UTC; pacha
+Author: Mauricio Vargas Sepulveda [aut, cre, cph]
     (<https://orcid.org/0000-0003-1017-7574>),
   Carlo Bottai [ctb] (improved the eigenvalues calculation),
   Diego Kozlowski [ctb] (provided initial RCA function used up to v0.2.4),
@@ -60,6 +60,6 @@ Author: Mauricio Vargas [aut, cre, cph]
     eigenvalues calculation),
   The World Bank [dtc] (World GDP per capita dataset),
   Open Trade Statistics [dtc] (World Trade dataset)
-Maintainer: Mauricio Vargas <hello+r@pacha.dev>
+Maintainer: Mauricio Vargas Sepulveda <m.sepulveda@mail.utoronto.ca>
 Repository: CRAN
-Date/Publication: 2022-09-04 07:00:02 UTC
+Date/Publication: 2023-08-07 20:50:02 UTC

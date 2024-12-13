@@ -14,41 +14,42 @@ head(world_gdp_avg_1998_to_2000)
 bi <- balassa_index(world_trade_avg_1998_to_2000)
 
 # partial view of index
-bi[1:5, 1:5]
+n <- seq_len(5)
+bi[n, n]
 
 ## -----------------------------------------------------------------------------
-bi_dec <- balassa_index(world_trade_avg_1998_to_2000, discrete = F)
+bi_dec <- balassa_index(world_trade_avg_1998_to_2000, discrete = FALSE)
 
 # partial view of index
-bi_dec[1:5, 1:5]
+bi_dec[n, n]
 
 ## -----------------------------------------------------------------------------
 com_fit <- complexity_measures(bi)
 
 # partial view of indexes
-com_fit$complexity_index_country[1:5]
-com_fit$complexity_index_product[1:5]
+com_fit$complexity_index_country[n]
+com_fit$complexity_index_product[n]
 
 ## -----------------------------------------------------------------------------
 com_ref <- complexity_measures(bi, method = "reflections")
 
 # partial view of indexes
-com_ref$complexity_index_country[1:5]
-com_ref$complexity_index_product[1:5]
+com_ref$complexity_index_country[n]
+com_ref$complexity_index_product[n]
 
 ## -----------------------------------------------------------------------------
 com_eig <- complexity_measures(bi, method = "eigenvalues")
 
 # partial view of indexes
-com_eig$complexity_index_country[1:5]
-com_eig$complexity_index_product[1:5]
+com_eig$complexity_index_country[n]
+com_eig$complexity_index_product[n]
 
 ## -----------------------------------------------------------------------------
 pro <- proximity(bi)
 
 # partial view of proximity matrices
-pro$proximity_country[1:5, 1:5]
-pro$proximity_product[1:5, 1:5]
+pro$proximity_country[n, n]
+pro$proximity_product[n, n]
 
 ## -----------------------------------------------------------------------------
 library(igraph)
@@ -56,18 +57,18 @@ library(igraph)
 net <- projections(pro$proximity_country, pro$proximity_product)
 
 # partial view of projections
-E(net$network_country)[1:5]
-E(net$network_product)[1:5]
+E(net$network_country)[n]
+E(net$network_product)[n]
 
 ## -----------------------------------------------------------------------------
 ecount(net$network_country)
 ecount(net$network_product)
 
-edge_density(net$network_country, loops = F)
-edge_density(net$network_product, loops = F)
+edge_density(net$network_country, loops = FALSE)
+edge_density(net$network_product, loops = FALSE)
 
-diameter(net$network_country, directed = F, unconnected = F)
-diameter(net$network_product, directed = F, unconnected = F)
+diameter(net$network_country, directed = FALSE, unconnected = FALSE)
+diameter(net$network_product, directed = FALSE, unconnected = FALSE)
 
 transitivity(net$network_country, type = "global")
 transitivity(net$network_product, type = "global")
@@ -142,17 +143,41 @@ clo2_products <- closeness(lcc_products)
 eig2_countries <- eigen_centrality(lcc_countries)$vector
 eig2_products <- eigen_centrality(lcc_products)$vector
 
-all.equal(deg_country[which.max(deg_country)], deg2_countries[which.max(deg2_countries)])
-all.equal(deg_product[which.max(deg_product)], deg2_products[which.max(deg2_products)])
+all.equal(
+  deg_country[which.max(deg_country)],
+  deg2_countries[which.max(deg2_countries)]
+)
+all.equal(
+  deg_product[which.max(deg_product)],
+  deg2_products[which.max(deg2_products)]
+)
 
-all.equal(bet_country[which.max(bet_country)], bet2_countries[which.max(bet2_countries)])
-all.equal(bet_product[which.max(bet_product)], bet2_products[which.max(bet2_products)])
+all.equal(
+  bet_country[which.max(bet_country)],
+  bet2_countries[which.max(bet2_countries)]
+)
+all.equal(
+  bet_product[which.max(bet_product)],
+  bet2_products[which.max(bet2_products)]
+)
 
-all.equal(clo_country[which.max(clo_country)], clo2_countries[which.max(clo2_countries)])
-all.equal(clo_product[which.max(clo_product)], clo2_products[which.max(clo2_products)])
+all.equal(
+  clo_country[which.max(clo_country)],
+  clo2_countries[which.max(clo2_countries)]
+)
+all.equal(
+  clo_product[which.max(clo_product)],
+  clo2_products[which.max(clo2_products)]
+)
 
-all.equal(eig_country[which.max(eig_country)], eig2_countries[which.max(eig2_countries)])
-all.equal(eig_product[which.max(eig_product)], eig2_products[which.max(eig2_products)])
+all.equal(
+  eig_country[which.max(eig_country)],
+  eig2_countries[which.max(eig2_countries)]
+)
+all.equal(
+  eig_product[which.max(eig_product)],
+  eig2_products[which.max(eig2_products)]
+)
 
 ## -----------------------------------------------------------------------------
 k <- 4
@@ -203,15 +228,18 @@ co <- complexity_outlook(
 )
 
 # partial view of complexity outlook
-co$complexity_outlook_index[1:5]
-co$complexity_outlook_gain[1:5, 1:5]
+co$complexity_outlook_index[n]
+co$complexity_outlook_gain[n, n]
 
 ## -----------------------------------------------------------------------------
-pl <- productivity_levels(world_trade_avg_1998_to_2000, world_gdp_avg_1998_to_2000)
+pl <- productivity_levels(
+  world_trade_avg_1998_to_2000,
+  world_gdp_avg_1998_to_2000
+)
 
 # partial view of productivity levels
-pl$productivity_level_country[1:5]
-pl$productivity_level_product[1:5]
+pl$productivity_level_country[n]
+pl$productivity_level_product[n]
 
 ## -----------------------------------------------------------------------------
 library(ggplot2)
@@ -297,7 +325,7 @@ ggplot(eig_product) +
   theme_minimal(base_size = 13) +
   labs(title = "Eigenvector Centrality Distribution for Products")
 
-## ---- fig.width=7, fig.height=7-----------------------------------------------
+## ----fig.width=7, fig.height=7------------------------------------------------
 set.seed(200100)
 
 library(ggraph)
@@ -308,9 +336,15 @@ aggregated_countries <- aggregate(
   FUN = sum
 )
 
-aggregated_countries <- setNames(aggregated_countries$x, aggregated_countries$country)
+aggregated_countries <- setNames(
+  aggregated_countries$x,
+  aggregated_countries$country
+)
 
-V(net$network_country)$size <- aggregated_countries[match(V(net$network_country)$name, names(aggregated_countries))]
+V(net$network_country)$size <- aggregated_countries[
+  match(V(net$network_country)$name,
+  names(aggregated_countries))
+]
 
 ggraph(net$network_country, layout = "kk") +
   # geom_edge_link(aes(edge_width = weight), edge_colour = "#a8a8a8") +
@@ -320,7 +354,7 @@ ggraph(net$network_country, layout = "kk") +
   ggtitle("Proximity Based Network Projection for Countries") +
   theme_void()
 
-## ---- fig.width=7, fig.height=7-----------------------------------------------
+## ----fig.width=7, fig.height=7------------------------------------------------
 # Paint svn, ken and cze in yellow and the rest of the world in blue
 
 V(net$network_country)$color <- rep(
@@ -343,7 +377,7 @@ ggraph(net$network_country, layout = "kk") +
     "Rest of the World" = "#002948"
   ))
 
-## ---- fig.width=10, fig.height=10---------------------------------------------
+## ----fig.width=10, fig.height=10----------------------------------------------
 set.seed(200100)
 
 aggregated_products <- aggregate(
@@ -352,10 +386,14 @@ aggregated_products <- aggregate(
   FUN = sum
 )
 
-aggregated_products <- setNames(aggregated_products$x, aggregated_products$country)
+aggregated_products <- setNames(
+  aggregated_products$x,
+  aggregated_products$country
+)
 
 V(net$network_product)$size <- aggregated_products[
-  match(V(net$network_product)$name, names(aggregated_products))
+  match(V(net$network_product)$name,
+  names(aggregated_products))
 ]
 
 ggraph(net$network_product, layout = "kk") +
@@ -365,7 +403,7 @@ ggraph(net$network_product, layout = "kk") +
   ggtitle("Proximity Based Network Projection for Products") +
   theme_void()
 
-## ---- fig.width=10, fig.height=10---------------------------------------------
+## ----fig.width=10, fig.height=10----------------------------------------------
 # Paint 8421, 7412 and 8434 in yellow and the rest of the products in blue
 
 V(net$network_product)$color <- rep(
@@ -388,7 +426,7 @@ ggraph(net$network_product, layout = "kk") +
     "Rest of the Products" = "#002948"
   ))
 
-## ---- fig.width=10, fig.height=10---------------------------------------------
+## ----fig.width=10, fig.height=10----------------------------------------------
 # Paint by community
 # for each vertex, replace X with the community number
 
@@ -396,7 +434,7 @@ set.seed(200100)
 
 V(net$network_country)$color2 <- rep(NA, length(V(net$network_country)$size))
 
-for (i in 1:length(V(net$network_country)$color2)) {
+for (i in seq_along(V(net$network_country)$color2)) {
   com_i <- as.character(com_country$membership[i])
 
   # if len(com$membership[i]) = 1, append a 0
@@ -421,7 +459,7 @@ ggraph(net$network_country, layout = "kk") +
   theme_void() +
   scale_colour_manual(values = my_colors)
 
-## ---- fig.width=10, fig.height=10---------------------------------------------
+## ----fig.width=10, fig.height=10----------------------------------------------
 # Paint by community
 # for each vertex, replace X with the community number
 
@@ -429,7 +467,7 @@ set.seed(200100)
 
 V(net$network_product)$color2 <- rep(NA, length(V(net$network_product)$size))
 
-for (i in 1:length(V(net$network_product)$color2)) {
+for (i in seq_along(V(net$network_product)$color2)) {
   com_i <- as.character(com_product$membership[i])
 
   # if len(com$membership[i]) = 1, append a 0
@@ -460,7 +498,7 @@ ggraph(net$network_product, layout = "kk") +
   theme_void() +
   scale_colour_manual(values = my_colors_2)
 
-## ---- fig.width=10, fig.height=10---------------------------------------------
+## ----fig.width=10, fig.height=10----------------------------------------------
 set.seed(200100)
 
 my_colors_3 <- c(
@@ -471,11 +509,14 @@ my_colors_3 <- c(
   "#7485aa", "#d3d3d3"
 )
 
-com_product <- cluster_fluid_communities(net$network_product, no.of.communities = 22)
+com_product <- cluster_fluid_communities(
+  net$network_product,
+  no.of.communities = 22
+)
 
 V(net$network_product)$color2 <- rep(NA, length(V(net$network_product)$size))
 
-for (i in 1:length(V(net$network_product)$color2)) {
+for (i in seq_along(V(net$network_product)$color2)) {
   com_i <- as.character(com_product$membership[i])
 
   # if len(com$membership[i]) = 1, append a 0
